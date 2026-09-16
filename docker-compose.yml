@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cobranzas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cobranzas}
+      POSTGRES_DB: ${POSTGRES_DB:-cobranzas}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cobranzas} -d ${POSTGRES_DB:-cobranzas}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://cobranzas:cobranzas@db:5432/cobranzas}
+      SECRET_KEY: ${SECRET_KEY:-clave-insegura-solo-para-desarrollo}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-480}
+      UPLOAD_DIR: ${UPLOAD_DIR:-/data/uploads}
+      BACKEND_PORT: ${BACKEND_PORT:-8000}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - uploads_data:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE: /api
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads_data:

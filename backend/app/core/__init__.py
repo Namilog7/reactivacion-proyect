@@ -1,0 +1,1 @@
+"""Core de la aplicación: seguridad, errores y dependencias compartidas."""

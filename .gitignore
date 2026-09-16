@@ -1,0 +1,25 @@
+# env
+.env
+*.local
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+dist/
+frontend/dist/
+
+# datos locales
+data/
+!data/.gitkeep
+
+# ide / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
