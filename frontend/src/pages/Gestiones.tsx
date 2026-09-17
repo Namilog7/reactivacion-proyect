@@ -434,7 +434,6 @@ function NuevaGestion({
   onCreada: (g: Gestion) => void;
 }) {
   const [clienteNumero, setClienteNumero] = useState("");
-  const [clienteNombre, setClienteNombre] = useState("");
   const [periodoId, setPeriodoId] = useState(
     periodos.find((p) => p.periodo_vigente)?.id ?? periodos[0]?.id ?? ""
   );
@@ -462,7 +461,6 @@ function NuevaGestion({
     setSaving(true);
     crear.mutate({
       cliente_numero: clienteNumero.trim(),
-      cliente_nombre: clienteNombre.trim() || null,
       periodo_id: periodoId,
       tipo_operacion_id: tipoId,
       operador_id: esSup ? operadorId || undefined : undefined,
@@ -480,10 +478,6 @@ function NuevaGestion({
       <div className="field">
         <label>Número de cliente *</label>
         <input value={clienteNumero} onChange={(e) => setClienteNumero(e.target.value)} autoFocus />
-      </div>
-      <div className="field">
-        <label>Nombre de cliente (opcional)</label>
-        <input value={clienteNombre} onChange={(e) => setClienteNombre(e.target.value)} />
       </div>
       <div className="field">
         <label>Período *</label>
