@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 480
     upload_dir: str = "/data/uploads"
     backend_port: int = 8000
+    redis_url: str = "redis://redis:6379"
+    sandbox_ttl_seconds: int = 3600
 
 
 @lru_cache
