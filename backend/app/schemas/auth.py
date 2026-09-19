@@ -18,6 +18,7 @@ class UsuarioOut(ORMModel):
     rol: Rol
     activo: bool
     created_at: datetime
+    tipo: str = "REAL"
 
 
 class TokenResponse(BaseModel):

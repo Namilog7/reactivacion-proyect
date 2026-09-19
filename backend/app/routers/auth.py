@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_usuario
 from app.core.security import create_access_token
 from app.database import get_db
-from app.models.usuario import Usuario
+from app.sandbox.principal import Principal, principal_a_usuario
 from app.schemas.auth import LoginRequest, TokenResponse, UsuarioOut
 from app.services.auth_service import AuthService
 
@@ -29,5 +29,5 @@ def login(credenciales: LoginRequest, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/me", response_model=UsuarioOut)
-def me(usuario: Annotated[Usuario, Depends(get_current_usuario)]):
-    return UsuarioOut.model_validate(usuario)
+def me(principal: Annotated[Principal, Depends(get_current_usuario)]):
+    return UsuarioOut.model_validate(principal_a_usuario(principal))

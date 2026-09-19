@@ -13,16 +13,22 @@ from app.models.periodo import Periodo
 from app.models.usuario import Usuario
 from app.repositories.gestion_repo import GestionRepo
 from app.repositories.periodo_repo import PeriodoRepo
+from app.sandbox.deps import get_reader_demo
+from app.sandbox.principal import Principal
+from app.sandbox.reader import DemoReader
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/operador")
 def dashboard_operador(
-    usuario: Annotated[Usuario, Depends(get_current_usuario)],
+    usuario: Annotated[Principal, Depends(get_current_usuario)],
     db: Annotated[Session, Depends(get_db)],
+    reader: Annotated[DemoReader | None, Depends(get_reader_demo)] = None,
     periodo_id: str | None = None,
 ):
+    if reader is not None:
+        return reader.dashboard_operador(periodo_id)
     if periodo_id:
         periodo = db.get(Periodo, periodo_id)
         if periodo is None:
@@ -92,9 +98,12 @@ def dashboard_operador(
 
 @router.get("/supervisor")
 def dashboard_supervisor(
-    _: Annotated[Usuario, Depends(require_supervisor)],
+    _: Annotated[Principal, Depends(require_supervisor)],
     db: Annotated[Session, Depends(get_db)],
+    reader: Annotated[DemoReader | None, Depends(get_reader_demo)] = None,
 ):
+    if reader is not None:
+        return reader.dashboard_supervisor()
     total_operadores = (
         db.scalar(select(func.count(Usuario.id)).where(Usuario.rol == Rol.OPERADOR)) or 0
     )

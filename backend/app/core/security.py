@@ -19,11 +19,11 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(subject: str, rol: str) -> str:
+def create_access_token(subject: str, rol: str, tipo: str = "REAL") -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.access_token_expire_minutes
     )
-    payload = {"sub": subject, "rol": rol, "exp": expire}
+    payload = {"sub": subject, "rol": rol, "tipo": tipo, "exp": expire}
     return jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)
 
 

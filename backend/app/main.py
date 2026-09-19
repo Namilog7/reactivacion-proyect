@@ -8,6 +8,7 @@ from app.routers import (
     dashboard,
     gestiones,
     periodos,
+    sandbox,
     usuarios,
 )
 
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(sandbox.router)
 app.include_router(usuarios.router)
 app.include_router(periodos.router)
 app.include_router(catalogos.router)
