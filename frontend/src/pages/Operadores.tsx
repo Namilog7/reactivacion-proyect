@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../auth/AuthContext";
 import { api } from "../api/client";
 import type {
   CargaOperadorResumen,
@@ -13,6 +14,8 @@ import { ErrorBanner, Modal, SuccessBanner } from "../components/ui";
 
 export function Operadores() {
   const qc = useQueryClient();
+  const { usuario } = useAuth();
+  const esDemo = usuario?.tipo === "DEMO";
   const { data: operadores, isLoading, error } = useQuery({
     queryKey: ["operadores"],
     queryFn: () => api.get<Usuario[]>("/usuarios"),
@@ -54,9 +57,11 @@ export function Operadores() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Operadores</h2>
-        <button className="btn btn-primary" onClick={() => setCrear(true)}>
-          + Nuevo operador
-        </button>
+        {!esDemo && (
+          <button className="btn btn-primary" onClick={() => setCrear(true)}>
+            + Nuevo operador
+          </button>
+        )}
       </div>
       <ErrorBanner message={errorMsg ?? (error instanceof Error ? error.message : null)} />
       <SuccessBanner message={okMsg} />
@@ -91,13 +96,15 @@ export function Operadores() {
                     <em>{op.criticas}</em> críticas
                   </span>
                 </div>
-                <button
-                  className="btn btn-primary"
-                  disabled={!op.activo}
-                  onClick={() => setCargandoOp(op)}
-                >
-                  Subir archivo…
-                </button>
+                {!esDemo && (
+                  <button
+                    className="btn btn-primary"
+                    disabled={!op.activo}
+                    onClick={() => setCargandoOp(op)}
+                  >
+                    Subir archivo…
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -127,19 +134,23 @@ export function Operadores() {
                   <td>{u.activo ? "Activo" : "Inactivo"}</td>
                   <td>{new Date(u.created_at).toLocaleDateString("es-AR")}</td>
                   <td style={{ display: "flex", gap: 6 }}>
-                    <button className="btn" onClick={() => setEditando(u)}>
-                      Editar
-                    </button>
-                    {u.activo && u.rol === "OPERADOR" && (
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => {
-                          if (confirm(`¿Desactivar al operador ${u.nombre}?`))
-                            desactivar.mutate(u.id);
-                        }}
-                      >
-                        Desactivar
-                      </button>
+                    {!esDemo && (
+                      <>
+                        <button className="btn" onClick={() => setEditando(u)}>
+                          Editar
+                        </button>
+                        {u.activo && u.rol === "OPERADOR" && (
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => {
+                              if (confirm(`¿Desactivar al operador ${u.nombre}?`))
+                                desactivar.mutate(u.id);
+                            }}
+                          >
+                            Desactivar
+                          </button>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>

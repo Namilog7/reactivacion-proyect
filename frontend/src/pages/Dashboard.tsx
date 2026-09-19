@@ -72,6 +72,8 @@ function OperadorDash() {
 
 function SupervisorDash() {
   const qc = useQueryClient();
+  const { usuario } = useAuth();
+  const esDemo = usuario?.tipo === "DEMO";
   const [crearPeriodo, setCrearPeriodo] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
@@ -121,9 +123,11 @@ function SupervisorDash() {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3>Períodos</h3>
-            <button className="btn btn-primary" onClick={() => setCrearPeriodo(true)}>
-              + Nuevo período
-            </button>
+            {!esDemo && (
+              <button className="btn btn-primary" onClick={() => setCrearPeriodo(true)}>
+                + Nuevo período
+              </button>
+            )}
           </div>
           <div className="table-wrap">
             <table className="data">
@@ -146,7 +150,7 @@ function SupervisorDash() {
                     <td>{p.anio}</td>
                     <td>{p.total_gestiones}</td>
                     <td>
-                      {!p.periodo_vigente && (
+                      {!esDemo && !p.periodo_vigente && (
                         <button className="btn" onClick={() => setVigente.mutate(p.id)}>
                           Fijar como vigente
                         </button>

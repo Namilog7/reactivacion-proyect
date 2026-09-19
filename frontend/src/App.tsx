@@ -8,10 +8,13 @@ import { Operadores } from "./pages/Operadores";
 function Layout() {
   const { usuario, logout } = useAuth();
   const esSupervisor = usuario?.rol === "SUPERVISOR";
+  const esDemo = usuario?.tipo === "DEMO";
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand">Gestión de Cobranzas</div>
+        <div className="brand">
+          Gestión de Cobranzas {esDemo && <span className="badge-demo">DEMO</span>}
+        </div>
         <NavLink to="/dashboard" end>
           Dashboard
         </NavLink>
@@ -32,6 +35,11 @@ function Layout() {
         </div>
       </aside>
       <main className="content">
+        {esDemo && (
+          <div className="alert-box alert-demo">
+            Modo demostración: los datos son de ejemplo y de solo lectura.
+          </div>
+        )}
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/gestiones" element={<Gestiones />} />

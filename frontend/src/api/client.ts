@@ -1,4 +1,5 @@
 const TOKEN_KEY = "cobranzas_token";
+export const SESION_EXPIRADA = "cobranzas_sesion_expirada";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -10,6 +11,11 @@ export function setToken(token: string) {
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
+}
+
+export function notificarSesionExpirada() {
+  clearToken();
+  window.dispatchEvent(new Event(SESION_EXPIRADA));
 }
 
 export class ApiError extends Error {
@@ -29,6 +35,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`/api${path}`, { ...options, headers });
+
+  if (res.status === 401 && token) notificarSesionExpirada();
 
   if (res.status === 204) return undefined as T;
 
@@ -73,6 +81,7 @@ export const api = {
     if (token) headers["Authorization"] = `Bearer ${token}`;
     return fetch(`/api${path}`, { method: "POST", headers, body: form }).then(
       async (res) => {
+        if (res.status === 401 && token) notificarSesionExpirada();
         const text = await res.text();
         const body = text ? JSON.parse(text) : null;
         if (!res.ok) {

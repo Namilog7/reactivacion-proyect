@@ -5,6 +5,7 @@ export interface Usuario {
   username: string;
   nombre: string;
   rol: Rol;
+  tipo: "REAL" | "DEMO";
   activo: boolean;
   created_at: string;
 }

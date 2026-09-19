@@ -15,6 +15,7 @@ const SORTS = [
 export function Gestiones() {
   const { usuario } = useAuth();
   const esSup = usuario?.rol === "SUPERVISOR";
+  const soloLectura = usuario?.tipo === "DEMO";
   const qc = useQueryClient();
 
   const [page, setPage] = useState(1);
@@ -102,9 +103,11 @@ export function Gestiones() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Gestiones</h2>
-        <button className="btn btn-primary" onClick={() => setCrear(true)}>
-          + Nueva gestión
-        </button>
+        {!soloLectura && (
+          <button className="btn btn-primary" onClick={() => setCrear(true)}>
+            + Nueva gestión
+          </button>
+        )}
       </div>
 
       <div className="filters">
@@ -245,6 +248,7 @@ export function Gestiones() {
                     key={g.id}
                     g={g}
                     esSup={esSup}
+                    soloLectura={soloLectura}
                     tipos={tipos ?? []}
                     guardando={guardandoId === g.id}
                     onToggle={(campo, valor) => toggle(g, campo, valor)}
@@ -291,6 +295,7 @@ export function Gestiones() {
 function Fila({
   g,
   esSup,
+  soloLectura,
   tipos,
   guardando,
   onToggle,
@@ -300,6 +305,7 @@ function Fila({
 }: {
   g: Gestion;
   esSup: boolean;
+  soloLectura: boolean;
   tipos: TipoOperacion[];
   guardando: boolean;
   onToggle: (campo: string, valor: boolean) => void;
@@ -331,7 +337,7 @@ function Fila({
         <select
           aria-label="Tipo de operación"
           value={g.tipo_operacion.id}
-          disabled={guardando}
+          disabled={guardando || soloLectura}
           onChange={(e) => {
             onPatch({ tipo_operacion_id: e.target.value });
           }}
@@ -348,33 +354,37 @@ function Fila({
           type="date"
           aria-label="Fecha ofrecida de pago"
           value={g.fecha_ofrecida_pago ?? ""}
-          disabled={guardando}
+          disabled={guardando || soloLectura}
           onChange={(e) => onPatch({ fecha_ofrecida_pago: e.target.value || null })}
         />
       </td>
       <AlertCell
         value={
-          <input type="checkbox" checked={g.pago} disabled={guardando} onChange={(e) => onToggle("pago", e.target.checked)} aria-label="Pagó" />
+          <input type="checkbox" checked={g.pago} disabled={guardando || soloLectura} onChange={(e) => onToggle("pago", e.target.checked)} aria-label="Pagó" />
         }
         showTip={g.pago && !g.tiene_nc}
         alertas={g.alertas}
       />
       <AlertCell
         value={
-          <input type="checkbox" checked={g.desbloqueado} disabled={guardando} onChange={(e) => onToggle("desbloqueado", e.target.checked)} aria-label="Desbloqueado" />
+          <input type="checkbox" checked={g.desbloqueado} disabled={guardando || soloLectura} onChange={(e) => onToggle("desbloqueado", e.target.checked)} aria-label="Desbloqueado" />
         }
         showTip={g.pago && !g.desbloqueado}
         alertas={g.alertas}
       />
       <AlertCell
         value={
-          <input type="checkbox" checked={g.tiene_nc} disabled={guardando} onChange={(e) => onToggle("tiene_nc", e.target.checked)} aria-label="Tiene nota de crédito" />
+          <input type="checkbox" checked={g.tiene_nc} disabled={guardando || soloLectura} onChange={(e) => onToggle("tiene_nc", e.target.checked)} aria-label="Tiene nota de crédito" />
         }
         showTip={(g.pago && !g.tiene_nc) || (g.tipo_operacion.codigo === "DEUDA_BONIFICADA" && !g.tiene_nc)}
         alertas={g.alertas}
       />
       <td style={{ minWidth: 220 }}>
-        {editObs ? (
+        {soloLectura ? (
+          <span title={g.observaciones || "Sin observaciones"}>
+            {g.observaciones || <span className="text-muted">Sin observaciones</span>}
+          </span>
+        ) : editObs ? (
           <span style={{ display: "flex", gap: 4 }}>
             <textarea
               rows={1}
