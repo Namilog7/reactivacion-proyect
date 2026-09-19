@@ -32,6 +32,7 @@ Es un monorepo con dos entregables ejecutables vía Docker Compose:
 - Reglas de alerta centralizadas en el backend (nivel `NINGUNA` / `ALERTA` / `CRITICA`) evaluadas por gestión. El frontend solo las renderiza.
 - Carga por operador: el supervisor sube un `.xlsx` con números de cliente y un motivo; el backend actualiza los flags de las gestiones correspondientes (idempotente, sin persistir el archivo).
 - Dashboard con métricas por operador (OPERADOR) y resumen global por período (SUPERVISOR).
+- **Modo demo/sandbox**: acceso anónimo y de **solo lectura** con datos de ejemplo respaldados por **Redis** y sesiones que expiran solas (TTL absoluto). Detalle en [docs/sandbox.md](docs/sandbox.md).
 - API documentada (OpenAPI/Swagger) accesible desde el frontend en `/api/docs`.
 
 ## Arquitectura
@@ -108,6 +109,8 @@ Detalles en [docs/instalacion.md](docs/instalacion.md) y [docs/manual-instalacio
 `ACCESS_TOKEN_EXPIRE_MINUTES` | expiración del token (default `480`) | backend |
 `UPLOAD_DIR` | directorio de archivos (default `/data/uploads`) | backend |
 `BACKEND_PORT` | puerto uvicorn interno (default `8000`) | backend |
+`REDIS_URL` | conexión Redis (default `redis://redis:6379`) | backend (modo demo) |
+`SANDBOX_TTL_SECONDS` | TTL absoluto de las sesiones demo en segundos (default `3600`) | backend (modo demo) |
 `FRONTEND_PORT` | puerto del frontend en el host (default `8080`) | frontend |
 
 > `DATABASE_URL` usa el host `db` porque el backend corre en la red interna de Compose. Si el backend va a otra infraestructura (p. ej. Render), apunta la URL ahí.
@@ -146,7 +149,7 @@ git pull && docker compose build && docker compose up -d
 
 ```
 ├── .env.example          # plantilla de configuración
-├── docker-compose.yml    # orquestación: db + backend + frontend
+├── docker-compose.yml    # orquestación: db + redis + backend + frontend
 ├── backend/
 │   ├── Dockerfile        # python:3.12-slim
 │   ├── scripts/entrypoint.sh  # alembic upgrade + seed + uvicorn
@@ -158,6 +161,7 @@ git pull && docker compose build && docker compose up -d
 │   │   ├── schemas/      # Pydantic (DTOs)
 │   │   ├── repositories/ # acceso a datos
 │   │   ├── services/     # lógica de aplicación (autenticación, gestión, carga, historial)
+│   │   ├── sandbox/      # modo demo: store Redis, seed, reader, deps (solo lectura)
 │   │   ├── routers/      # API REST (auth, usuarios, periodos, catalogos, gestiones, cargas, dashboard)
 │   │   ├── importer/     # parsers de XLSX
 │   │   ├── core/         # seguridad (JWT), dependencias, configuración
@@ -187,6 +191,7 @@ git pull && docker compose build && docker compose up -d
 | Desarrollo y extensión | [docs/desarrollo.md](docs/desarrollo.md) |
 | API | [docs/api.md](docs/api.md) |
 | Flujo de carga por operador | [docs/cargas.md](docs/cargas.md) |
+| Modo demo/sandbox | [docs/sandbox.md](docs/sandbox.md) |
 | Manual de usuario | [docs/manual-usuario.md](docs/manual-usuario.md) |
 | Auditoría técnica | [docs/auditoria-tecnica.md](docs/auditoria-tecnica.md) |
 
